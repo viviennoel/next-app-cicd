@@ -1,0 +1,27 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  permissions:
+      id-token: write
+      contents: read
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Install NPM dependencies
+        run: npm install
+      - name: Configure AWS Credentials 🔧
+        uses: aws-actions/configure-aws-credentials@v1.6.1 # Version at the time of this writing
+        with: # We are loading keys stored in secrets
+          role-to-assume: arn:aws:iam::062236728526:role/admin-github-trusted # You can specify the role name when creating it or AWS will automatically generate one for you
+          aws-region: eu-central-1
+      - name: Deploy Next.js app
+        run: npx serverless
